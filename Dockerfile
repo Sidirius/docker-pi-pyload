@@ -24,9 +24,6 @@ RUN mkdir -p /var/log/supervisor
 ### Checkout pyload sources
 RUN git clone https://github.com/pyload/pyload.git /opt/pyload
 
-### Add PyLoad Config Dir
-# ADD pyload /opt/.pyload
-
 ### Configure ssh
 RUN echo 'root:root' |chpasswd
 RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
@@ -41,17 +38,8 @@ RUN apt-get -y autoremove
 ### Configure Supervisor
 ADD supervisord.conf /
 
-### Volume
-# VOLUME ["/opt/downloads"]
-
 ### Expose ports
 EXPOSE 22 8000 7227
-
-### Start Supervisor
-#CMD ["/usr/bin/supervisord","-n"]
-
-### Config PyLoad
-CMD ["python /opt/pyload/pyLoadCore.py"]
 
 ### Add startup.sh
 ADD startup.sh /
