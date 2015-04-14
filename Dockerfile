@@ -4,7 +4,13 @@ MAINTAINER Sven Hartmann <sid@sh87.net>
 
 ### Install Applications DEBIAN_FRONTEND=noninteractive  --no-install-recommends
 RUN apt-get update && apt-get clean
-RUN apt-get install -y python-crypto python-pycurl tesseract-ocr git openssh-server supervisor
+RUN apt-get install -y \
+	python-crypto python-pycurl tesseract-ocr git openssh-server supervisor \
+	liblept3 python python-crypto python-pycurl python-imaging tesseract-ocr zip unzip \
+	build-dep rar unrar-nonfree
+RUN apt-get source -b unrar-nonfree
+RUN dpkg -i unrar_4.1.4-1_armhf.deb
+RUN rm -rf unrar_*
 RUN mkdir -p /var/run/sshd
 RUN chmod 755 /var/run/sshd
 RUN mkdir -p /var/log/supervisor
