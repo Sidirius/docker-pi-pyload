@@ -3,14 +3,20 @@ FROM resin/rpi-raspbian:wheezy
 MAINTAINER Sven Hartmann <sid@sh87.net>
 
 ### Install Applications DEBIAN_FRONTEND=noninteractive  --no-install-recommends
+ENV DEBIAN_FRONTEND noninteractive
+ENV HOME /root
+RUN echo "deb-src http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi" | tee --append /etc/apt/sources.list
 RUN apt-get update && apt-get clean
-RUN apt-get install -y \
-	python-crypto python-pycurl tesseract-ocr git openssh-server supervisor \
-	liblept3 python python-crypto python-pycurl python-imaging tesseract-ocr zip unzip \
-	build-dep rar unrar-nonfree
-RUN apt-get source -b unrar-nonfree
-RUN dpkg -i unrar_4.1.4-1_armhf.deb
-RUN rm -rf unrar_*
+RUN apt-get install -y apt-utils
+RUN apt-get install -y openssh-server supervisor git
+RUN apt-get install -y python python-crypto python-pycurl python-imaging
+RUN apt-get install -y liblept3 tesseract-ocr 
+RUN apt-get install -y zip unzip
+RUN apt-get install -y dpkg-dev
+RUN apt-get build-dep -y unrar-nonfree
+RUN apt-get source -b unrar-nonfree && \
+	dpkg -i unrar_4.1.4-1_armhf.deb && \
+	rm -rf unrar_*
 RUN mkdir -p /var/run/sshd
 RUN chmod 755 /var/run/sshd
 RUN mkdir -p /var/log/supervisor
@@ -33,13 +39,19 @@ RUN apt-get -y clean
 RUN apt-get -y autoremove
 
 ### Configure Supervisor
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ADD supervisord.conf /
 
 ### Volume
-VOLUME ["/opt/downloads"]
+# VOLUME ["/opt/downloads"]
 
 ### Expose ports
 EXPOSE 22 8000 7227
 
 ### Start Supervisor
-CMD ["/usr/bin/supervisord","-n"]
+#CMD ["/usr/bin/supervisord","-n"]
+
+### Add startup.sh
+ADD startup.sh /
+
+### Set Entrypoint
+ENTRYPOINT ["/startup.sh"]
