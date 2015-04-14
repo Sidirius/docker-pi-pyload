@@ -25,7 +25,7 @@ RUN mkdir -p /var/log/supervisor
 RUN git clone https://github.com/pyload/pyload.git /opt/pyload
 
 ### Add PyLoad Config Dir
-ADD pyload /opt/.pyload
+# ADD pyload /opt/.pyload
 
 ### Configure ssh
 RUN echo 'root:root' |chpasswd
@@ -49,6 +49,9 @@ EXPOSE 22 8000 7227
 
 ### Start Supervisor
 #CMD ["/usr/bin/supervisord","-n"]
+
+### Config PyLoad
+CMD ["python /opt/pyload/pyLoadCore.py"]
 
 ### Add startup.sh
 ADD startup.sh /
