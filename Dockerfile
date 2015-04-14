@@ -2,15 +2,38 @@
 FROM resin/rpi-raspbian:wheezy
 MAINTAINER Sven Hartmann <sid@sh87.net>
 
-# Install dependencies
-RUN echo "deb-src http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi" | tee --append /etc/apt/sources.list
-RUN apt-get update && apt-get install -y \
-    
-    --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+### Install Applications DEBIAN_FRONTEND=noninteractive  --no-install-recommends
+RUN apt-get update && apt-get clean
+RUN apt-get install -y python-crypto python-pycurl tesseract-ocr git openssh-server supervisor
+RUN mkdir -p /var/run/sshd
+RUN chmod 755 /var/run/sshd
+RUN mkdir -p /var/log/supervisor
 
-# Define working directory
-WORKDIR /data
+### Checkout pyload sources
+RUN git clone https://github.com/pyload/pyload.git /opt/pyload
 
-# Define default command
-CMD ["bash"]
+### Add PyLoad Config Dir
+ADD pyload /opt/.pyload
+
+### Configure ssh
+RUN echo 'root:root' |chpasswd
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+RUN sed -ri 's/#UsePAM no/UsePAM no/g' /etc/ssh/sshd_config
+RUN sed -ri 's/PermitRootLogin without-password/PermitRootLogin yes/g' /etc/ssh/sshd_config
+
+### Clean
+RUN apt-get -y autoclean
+RUN apt-get -y clean
+RUN apt-get -y autoremove
+
+### Configure Supervisor
+ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+### Volume
+VOLUME ["/opt/downloads"]
+
+### Expose ports
+EXPOSE 22 8000 7227
+
+### Start Supervisor
+CMD ["/usr/bin/supervisord","-n"]
