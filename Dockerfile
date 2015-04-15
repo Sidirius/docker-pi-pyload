@@ -15,8 +15,9 @@ RUN apt-get install -y zip unzip
 RUN apt-get install -y dpkg-dev
 RUN apt-get build-dep -y unrar-nonfree
 RUN apt-get source -b unrar-nonfree && \
-	dpkg -i unrar_4.1.4-1_armhf.deb && \
+	dpkg -i unrar*.deb && \
 	rm -rf unrar_*
+RUN apt-get install -y screen
 RUN mkdir -p /var/run/sshd
 RUN chmod 755 /var/run/sshd
 RUN mkdir -p /var/log/supervisor
@@ -37,6 +38,9 @@ RUN apt-get -y autoremove
 
 ### Configure Supervisor
 ADD supervisord.conf /
+
+### Add pyLoad config
+ADD pyload /root/.pyload
 
 ### Expose ports
 EXPOSE 22 8000 7227

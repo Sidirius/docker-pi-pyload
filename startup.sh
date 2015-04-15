@@ -1,14 +1,6 @@
 #!/bin/bash
 mkdir /var/run/sshd
-if [ ! -f /root/.pyload/files.db ]
-then
-    python /opt/pyload/pyLoadCore.py
-    sleep 3
-    pkill python
-fi
-#/usr/bin/supervisord -c /supervisord.conf
-pkill python
-python /opt/pyload/pyLoadCore.py
+screen -dmS supervisord /usr/bin/supervisord -c /supervisord.conf
 while [ 1 ]; do
     /bin/bash
 done
